@@ -1,0 +1,6 @@
+testdata/*
+tmpdata/*
+.vscode
+*.bed
+*.tad
+*.bedpe
