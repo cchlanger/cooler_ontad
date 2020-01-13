@@ -4,3 +4,4 @@ tmpdata/*
 *.bed
 *.tad
 *.bedpe
+*.sizes

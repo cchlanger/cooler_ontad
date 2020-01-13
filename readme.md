@@ -1,8 +1,9 @@
  OnTAD repo:
  https://github.com/anlin00007/OnTAD
 
- Create Imput with:
- create_dense_matrix.py
+Create Input with:
+python create_dense_matrix.py testdata/G2.fc_1_2.wOldG2.cis.1000.mcool -b 50000
+
 
  Use there docker:
  singularity run docker://anlin00007/ontad:v1.2

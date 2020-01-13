@@ -16,6 +16,5 @@ for filename in args.file:
         # Load to pandas:
         df = pd.read_csv(csvfile, sep="\t", header=None)
         df[3] = df[0]
-        df = df.drop(columns=[4,5,8])
+        df = df.drop(columns=[4, 5, 8])
         df.to_csv(filename[:-4]+".bedpe", header=None, index=False, sep="\t")
-
