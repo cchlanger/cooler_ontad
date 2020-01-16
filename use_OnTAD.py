@@ -3,16 +3,11 @@ import click
 import os
 import cooler
 import tempfile
-# import cooltools
-# import cooltools.snipping
 import bioframe
 from NGS import HiCTools as HT
 import numpy as np
 import pandas as pd
-
 import subprocess
-# import logging
-# import shlex
 import glob
 import re
 import shutil
@@ -51,8 +46,6 @@ def convert_to_bedpe(cooler_filename, binsize, tad_folder):
                 # Output bedpde with addtitonal columns TADlevel  TADmean  TADscore
     bedpe = pd.concat(results)
     bedpe.to_csv(os.path.basename(cooler_filename)[:-6] + ".binsize_" + str(binsize) + ".bedpe", header=None, index=False, sep="\t")
-
-# TODO:Stitch files together
 
 
 def create_dense_matrix(filep, binsize):
@@ -94,25 +87,26 @@ def create_dense_matrix(filep, binsize):
 def main(filep, binsize, penalty, minsz, maxsz, ldiff, lsize):
     # Create Matrix for every chromosome for OnTAD
     matrix_folder = create_dense_matrix(filep, binsize)
-    # Call On TAD
+    # Call OnTAD
     f_list = glob.glob('%s/*.matrix' % matrix_folder)
     processes = []
-        # Creates the files in the format for OnTADO
+    # Runs OnTAD
     tad_folder = tempfile.mkdtemp(suffix=None, prefix=None, dir=None)
     for filename in f_list:
-        # TODO parse all options
         filename_base = os.path.basename(filename)[:-7]
-        command_string = "OnTAD %s -penalty 0.1 -maxsz 200 -o %s/%s" % (filename, tad_folder, filename_base)
+        command_string = "OnTAD %s -penalty %s -maxsz %s -maxsz %s -ldiff %s -lsize %s -o %s/%s" % (filename, penalty, minsz, maxsz, ldiff, lsize, tad_folder, filename_base)
         processes.append(subprocess.Popen(command_string, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True))
     for proc in processes:
         output, error = proc.communicate()
         if proc.returncode != 0:
             print(error.decode("utf-8"))
-    # Creates the .bedpe wfor all chromosomes
+    # Creates the .bedpe for all chromosomes
     convert_to_bedpe(filep, binsize, tad_folder)
     # remove /temp dirs
-    shutil.rmtree(matrix_folder)
-    shutil.rmtree(tad_folder)
+    print(matrix_folder)
+    print(tad_folder)
+    #shutil.rmtree(matrix_folder)
+    #shutil.rmtree(tad_folder)
 
 
 if __name__ == "__main__":
