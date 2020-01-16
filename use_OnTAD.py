@@ -20,7 +20,6 @@ arms = HT.getArmsHg19()
 
 def convert_to_bedpe(cooler_filename, binsize, tad_folder):
     # get bins from cooler file
-    binsize = 50000
     cooler_obj = cooler.Cooler(f'{cooler_filename}::/resolutions/{binsize}')
     bins = cooler_obj.bins()[:]
     f_list = glob.glob('%s/*.tad' % tad_folder)
