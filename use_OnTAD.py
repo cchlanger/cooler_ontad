@@ -4,18 +4,16 @@ import os
 import cooler
 import tempfile
 import bioframe
-from NGS import HiCTools as HT
 import numpy as np
 import pandas as pd
 import subprocess
 import glob
 import re
 import shutil
-# TODO nice logging
+
 # get chromosomal arms
 
 chromsizes = bioframe.fetch_chromsizes("hg19")
-arms = HT.getArmsHg19()
 
 
 def convert_to_bedpe(cooler_filename, binsize, tad_folder):
