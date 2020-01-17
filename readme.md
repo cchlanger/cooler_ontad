@@ -1,10 +1,14 @@
-OnTAD repo:
+Wraps OnTAD to work with the cooler ecosystem:
+https://github.com/mirnylab/cooler
+
+OnTAD:
 https://github.com/anlin00007/OnTAD
 
-Use our docker:
-singularity run docker://gerlichlab/mmhic:release-1.0
+Use our docker container:
+singularity run docker://gerlichlab/mmhic:release-1.1
 
+Run to see possible parameters:
+use_OnTAD --help
 Run example:
-python use_OnTAD.py testdata/G2.fc_1_2.wOldG2.cis.1000.mcool
-
+use_OnTAD.py testdata/G2.fc_1_2.wOldG2.cis.1000.mcool
 
