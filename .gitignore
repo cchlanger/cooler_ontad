@@ -7,3 +7,4 @@ result/*
 *.tad
 *.bedpe
 *.sizes
+__pycache__/*
