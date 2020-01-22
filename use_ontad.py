@@ -16,7 +16,7 @@ import shutil
 chromsizes = bioframe.fetch_chromsizes("hg19")
 
 
-def convert_to_bedpe(cooler_filename, binsize, tad_folder):
+def convert_to_bedpe(cooler_filename, binsize, tad_folder, penalty, minsz, maxsz, ldiff, lsize, output):
     # get bins from cooler file
     cooler_obj = cooler.Cooler(f'{cooler_filename}::/resolutions/{binsize}')
     bins = cooler_obj.bins()[:]
@@ -51,7 +51,30 @@ def convert_to_bedpe(cooler_filename, binsize, tad_folder):
                 results.append(result)
                 # Output bedpde with addtitonal columns TADlevel  TADmean  TADscore
     bedpe = pd.concat(results)
-    bedpe.to_csv(os.path.basename(cooler_filename)[:-6] + ".binsize_" + str(binsize) + ".bedpe", header=None, index=False, sep="\t")
+    # Only adds paremeters to basefilename if not default or specified by the user
+    string_binsize = ""
+    string_penalty = ""
+    string_minsz = ""
+    string_maxsz = ""
+    string_ldiff = ""
+    string_lsize = ""
+    string_output = ""
+    if (binsize != 50000):
+        string_binsize = ".binsize_" + str(binsize)
+    if (penalty != 0.1):
+        string_penalty = ".penalty_" + str(penalty)
+    if (minsz != 3):
+        string_minsz = ".minsz_" + str(minsz)
+    if (maxsz != 200):
+        string_maxsz = ".maxsz_" + str(maxsz)
+    if (ldiff != 1.96):
+        string_ldiff = ".ldiff_" + str(ldiff)
+    if (lsize != 5):
+        string_lsize = ".lsize_" + str(lsize)
+    if output is not None:
+        bedpe.to_csv(output, header=None, index=False, sep="\t")
+    else:
+        bedpe.to_csv(os.path.basename(cooler_filename)[:-6] + string_binsize + string_penalty + string_minsz + string_maxsz + string_ldiff + string_lsize + string_output + ".bedpe", header=None, index=False, sep="\t")
 
 
 def create_dense_matrix(filep, binsize):
@@ -74,23 +97,25 @@ def create_dense_matrix(filep, binsize):
               help='Resulution size.',
               show_default=True)
 @click.option('--penalty', default=0.1,
-              help='-penalty <float> The penalty applied in scoring function to select positive TADs. Higher penalty score will result in fewer TADs.',
+              help='--penalty <float> The penalty applied in scoring function to select positive TADs. Higher penalty score will result in fewer TADs.',
               show_default=True)
 @click.option('--maxsz', default=200,
-              help='-maxsz <int> The maximum size of TADs can be called. The size is determined by number of bins covered in the contact matrix.',
+              help='--maxsz <int> The maximum size of TADs can be called. The size is determined by number of bins covered in the contact matrix.',
               show_default=True)
 @click.option('--minsz', default=3,
-              help='-minsz <int> The minimum size of TADs can be called. The size is determined by number of bins covered in the contact matrix.',
+              help='--minsz <int> The minimum size of TADs can be called. The size is determined by number of bins covered in the contact matrix.',
               show_default=True)
 @click.option('--ldiff', default=1.96,
-              help='-ldiff <float> The cut-off to determine local minimum. (local maximum - local minimum >= ldiff*std)',
+              help='--ldiff <float> The cut-off to determine local minimum. (local maximum - local minimum >= ldiff*std)',
               show_default=True)
 @click.option('--lsize', default=5,
-              help='-lsize <int> The local region size that used to determine local minimum',
+              help='--lsize <int> The local region size that used to determine local minimum',
               show_default=True)
+@click.option('--o', default=None,
+              help='--o <strig> Output filename. If left empty .mcool basename is extened with all non default parameters.')
 # -log2 <boolean> if specified, log2(contact frequency) will be used to call TADs.
 # -o <file path> The file path for the TAD calling results.
-def main(filep, binsize, penalty, minsz, maxsz, ldiff, lsize):
+def main(filep, binsize, penalty, minsz, maxsz, ldiff, lsize, o):
     # Create Matrix for every chromosome for OnTAD
     print("Creating Matrix ...")
     matrix_folder = create_dense_matrix(filep, binsize)
@@ -110,7 +135,7 @@ def main(filep, binsize, penalty, minsz, maxsz, ldiff, lsize):
             print(error.decode("utf-8"))
     # Creates the .bedpe for all chromosomes
     print("Creating OnTAD ...")
-    convert_to_bedpe(filep, binsize, tad_folder)
+    convert_to_bedpe(filep, binsize, tad_folder, penalty, minsz, maxsz, ldiff, lsize, o)
     # remove /temp dirs
     # print(matrix_folder)
     # print(tad_folder)
