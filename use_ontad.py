@@ -33,7 +33,7 @@ def convert_to_bedpe(cooler_filename, binsize, tad_folder, penalty, minsz, maxsz
                 # Substract one from all bin1_id and bin2_id to correct for one-based indexing in OnTAD
                 df = df.sub([1, 1, 0, 0, 0], axis="columns")
                 # Extract Chromosome name out of filename
-                region = re.findall(r"(chr\d|chr\w)", tad_filename)[0]
+                region = re.findall(r"(chr\d+|chr\w)", tad_filename)[0]
                 # Add offset for particular chromosome
                 offset = cooler_obj.offset(region)
                 df = df.add([offset, offset, 0, 0, 0], axis="columns")
