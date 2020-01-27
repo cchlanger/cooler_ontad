@@ -111,15 +111,25 @@ def create_dense_matrix(filep, binsize):
 @click.option('--lsize', default=5,
               help='--lsize <int> The local region size that used to determine local minimum',
               show_default=True)
+@click.option('--dense_matrix_only', is_flag=True,
+              help='--dense_matrix_only <boulean> If chosen a folder dense_matrices is created and further processing is stoped',
+              show_default=True)
 @click.option('--o', default=None,
               help='--o <strig> Output filename. If left empty .mcool basename is extened with all non default parameters.')
 # -log2 <boolean> if specified, log2(contact frequency) will be used to call TADs.
 # -o <file path> The file path for the TAD calling results.
-def main(filep, binsize, penalty, minsz, maxsz, ldiff, lsize, o):
+def main(filep, binsize, penalty, minsz, maxsz, ldiff, lsize, dense_matrix_only, o):
     # Create Matrix for every chromosome for OnTAD
     print("Creating Matrix ...")
     matrix_folder = create_dense_matrix(filep, binsize)
     # Call OnTAD
+    if (dense_matrix_only is True):
+        print("Saving Matrix then Aborting!")
+        if o is None:
+            shutil.copytree(matrix_folder, "dense_matrices")
+        else:
+            shutil.copytree(matrix_folder, os.path.dirname(o) + "/dense_matrices")
+        return 0
     f_list = glob.glob('%s/*.matrix' % matrix_folder)
     processes = []
     # Runs OnTAD
