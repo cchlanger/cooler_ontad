@@ -39,15 +39,14 @@ def convert_to_bedpe(cooler_filename, binsize, tad_folder, penalty, minsz, maxsz
                 df = df.add([offset, offset, 0, 0, 0], axis="columns")
                 # Use cooler anotate
                 result = cooler.annotate(df, bins)
-                # print(result)
                 result = result.drop(columns=["weight1", "weight2", "bin1_id", "bin2_id"])
                 # For bedpe we need mitpoint of the bins and both points are identical
-                result["start1"] = result["start1"] + int((binsize / 2))
-                result["start2"] = result["start2"] + int((binsize / 2))
-                result["end2"] = result["start2"]
-                result["end1"] = result["start2"]
-                result["start2"] = result["start1"]
-                # print(result)
+                mid_pos1 = (result["start1"] + result["end1"]) / 2
+                mid_pos2 = (result["start2"] + result["end2"]) / 2
+                result["start1"] = mid_pos1.astype('int32')
+                result["end1"] = mid_pos2.astype('int32')
+                result["start2"] = mid_pos1.astype('int32')
+                result["end2"] = mid_pos2.astype('int32')
                 results.append(result)
                 # Output bedpde with addtitonal columns TADlevel  TADmean  TADscore
     bedpe = pd.concat(results)
