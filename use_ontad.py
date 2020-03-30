@@ -10,6 +10,7 @@ import subprocess
 import glob
 import re
 import shutil
+import warnings
 
 # get chromosomal arms
 
@@ -27,8 +28,12 @@ def convert_to_bedpe(cooler_filename, binsize, tad_folder, penalty, minsz, maxsz
         if os.stat(tad_filename).st_size != 0:
             with open(tad_filename, "r") as csvfile:
                 csvfile = open(tad_filename, "r")
-                # Skip first row, since this encodes level 0, which is the whole chromosome
-                df = pd.read_csv(csvfile, sep="\t", header=None, skiprows=1)
+                # Skip first row, since this encodes level 0, which is the whole chromosome and check whether the file is empty afterwards
+                try:
+                    df = pd.read_csv(csvfile, sep="\t", header=None, skiprows=1)
+                except pd.errors.EmptyDataError:
+                    warnings.warn(f"{tad_filename} contains no TADs!")
+                    continue
                 df = df.rename(columns={0: "bin1_id", 1: "bin2_id"})
                 # Substract one from all bin1_id and bin2_id to correct for one-based indexing in OnTAD
                 df = df.sub([1, 1, 0, 0, 0], axis="columns")
