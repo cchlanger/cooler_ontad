@@ -1,9 +1,9 @@
 from setuptools import setup
 
 setup(
-    name='use_ontad',
+    name='cooler_ontad',
     version='0.1',
-    py_modules=['use_ontad'],
+    py_modules=['cooler_ontad'],
     install_requires=[
         'click',
         'bioframe',
@@ -13,6 +13,6 @@ setup(
     ],
     entry_points='''
         [console_scripts]
-        use_ontad=use_ontad:main
+        cooler_ontad=cooler_ontad:main
     ''',
 )

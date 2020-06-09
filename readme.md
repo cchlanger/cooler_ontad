@@ -8,7 +8,7 @@ Use our docker container:
 singularity run docker://gerlichlab/mmhic:release-1.1
 
 Run to see possible parameters:
-use_OnTAD --help
+cooler_ontad --help
 Run example:
-use_OnTAD.py testdata/G2.fc_1_2.wOldG2.cis.1000.mcool
+cooler_ontad.py testdata/G2.fc_1_2.wOldG2.cis.1000.mcool
 
