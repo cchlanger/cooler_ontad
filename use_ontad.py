@@ -63,17 +63,17 @@ def convert_to_bedpe(cooler_filename, binsize, tad_folder, penalty, minsz, maxsz
     string_ldiff = ""
     string_lsize = ""
     string_output = ""
-    if (binsize != 50000 or short_name != True):
+    if (binsize != 50000 or short_name is not True):
         string_binsize = ".binsize_" + str(binsize)
-    if (penalty != 0.1 or short_name != True):
+    if (penalty != 0.1 or short_name is not True):
         string_penalty = ".penalty_" + str(penalty)
-    if (minsz != 3 or short_name != True):
+    if (minsz != 3 or short_name is not True):
         string_minsz = ".minsz_" + str(minsz)
-    if (maxsz != 200 or short_name != True):
+    if (maxsz != 200 or short_name is not True):
         string_maxsz = ".maxsz_" + str(maxsz)
-    if (ldiff != 1.96 or short_name != True):
+    if (ldiff != 1.96 or short_name is not True):
         string_ldiff = ".ldiff_" + str(ldiff)
-    if (lsize != 5 or short_name != True):
+    if (lsize != 5 or short_name is not True):
         string_lsize = ".lsize_" + str(lsize)
     if output is not None:
         bedpe.to_csv(output, header=None, index=False, sep="\t")
