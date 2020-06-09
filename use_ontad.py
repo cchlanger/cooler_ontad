@@ -17,7 +17,7 @@ import warnings
 chromsizes = bioframe.fetch_chromsizes("hg19")
 
 
-def convert_to_bedpe(cooler_filename, binsize, tad_folder, penalty, minsz, maxsz, ldiff, lsize, output):
+def convert_to_bedpe(cooler_filename, binsize, tad_folder, penalty, minsz, maxsz, ldiff, lsize, output, short_name):
     # get bins from cooler file
     cooler_obj = cooler.Cooler(f'{cooler_filename}::/resolutions/{binsize}')
     bins = cooler_obj.bins()[:]
@@ -63,17 +63,17 @@ def convert_to_bedpe(cooler_filename, binsize, tad_folder, penalty, minsz, maxsz
     string_ldiff = ""
     string_lsize = ""
     string_output = ""
-    if (binsize != 50000):
+    if (binsize != 50000 or short_name != True):
         string_binsize = ".binsize_" + str(binsize)
-    if (penalty != 0.1):
+    if (penalty != 0.1 or short_name != True):
         string_penalty = ".penalty_" + str(penalty)
-    if (minsz != 3):
+    if (minsz != 3 or short_name != True):
         string_minsz = ".minsz_" + str(minsz)
-    if (maxsz != 200):
+    if (maxsz != 200 or short_name != True):
         string_maxsz = ".maxsz_" + str(maxsz)
-    if (ldiff != 1.96):
+    if (ldiff != 1.96 or short_name != True):
         string_ldiff = ".ldiff_" + str(ldiff)
-    if (lsize != 5):
+    if (lsize != 5 or short_name != True):
         string_lsize = ".lsize_" + str(lsize)
     if output is not None:
         bedpe.to_csv(output, header=None, index=False, sep="\t")
@@ -116,13 +116,14 @@ def create_dense_matrix(filep, binsize):
               help='--lsize <int> The local region size that used to determine local minimum',
               show_default=True)
 @click.option('--dense_matrix_only', is_flag=True,
-              help='--dense_matrix_only <boulean> If chosen a folder dense_matrices is created and further processing is stoped',
-              show_default=True)
+              help='--dense_matrix_only If chosen a folder dense_matrices is created and further processing is stoped')
 @click.option('--o', default=None,
               help='--o <strig> Output filename. If left empty .mcool basename is extened with all non default parameters.')
+@click.option('--short_name', is_flag=True,
+              help='--short_name If chosen only paremeters are added to basefilename if they are not default or specified by the user.')
 # -log2 <boolean> if specified, log2(contact frequency) will be used to call TADs.
 # -o <file path> The file path for the TAD calling results.
-def main(filep, binsize, penalty, minsz, maxsz, ldiff, lsize, dense_matrix_only, o):
+def main(filep, binsize, penalty, minsz, maxsz, ldiff, lsize, dense_matrix_only, o, short_name):
     # Create Matrix for every chromosome for OnTAD
     print("Creating Matrix ...")
     matrix_folder = create_dense_matrix(filep, binsize)
@@ -141,7 +142,7 @@ def main(filep, binsize, penalty, minsz, maxsz, ldiff, lsize, dense_matrix_only,
     tad_folder = tempfile.mkdtemp(suffix=None, prefix=None, dir=None)
     for filename in f_list:
         filename_base = os.path.basename(filename)[:-7]
-        command_string = "OnTAD %s -penalty %s -maxsz %s -maxsz %s -ldiff %s -lsize %s -o %s/%s" % (filename, penalty, minsz, maxsz, ldiff, lsize, tad_folder, filename_base)
+        command_string = "OnTAD %s -penalty %s -maxsz %s -maxsz %s -ldiff %s -lsize %s -o %s/%s" % (filename, penalty, minsz, maxsz, ldiff, lsize, tad_folder, filename_base, short_name)
         processes.append(subprocess.Popen(command_string, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True))
     for proc in processes:
         output, error = proc.communicate()
@@ -149,7 +150,7 @@ def main(filep, binsize, penalty, minsz, maxsz, ldiff, lsize, dense_matrix_only,
             print(error.decode("utf-8"))
     # Creates the .bedpe for all chromosomes
     print("Creating OnTAD ...")
-    convert_to_bedpe(filep, binsize, tad_folder, penalty, minsz, maxsz, ldiff, lsize, o)
+    convert_to_bedpe(filep, binsize, tad_folder, penalty, minsz, maxsz, ldiff, lsize, o, short_name)
     # remove /temp dirs
     # print(matrix_folder)
     # print(tad_folder)
