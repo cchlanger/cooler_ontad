@@ -3,7 +3,7 @@ cooler_ontad is a tool that wraps [OnTAD](https://github.com/anlin00007/OnTAD) t
 https://github.com/mirnylab/cooler).
 
 This tool consists of three steps:
-- It creates a dense matrix for OnTAD out of a mcooler file, 
+- It creates a dense matrix for OnTAD out of a .mcooler file, 
 - runs OnTAD,
 - and creates a .bedpe out of the ONTAD results, all parameters used will be extended to the filename.
 
@@ -13,6 +13,8 @@ pip install ${githubpath}
 This will set up a command called cooler_ontad in your environment.
 
 ## Usage Examples:
+Example files can be found on [GEO](https://www.ncbi.nlm.nih.gov/geo/query/acc.cgi?acc=GSE152373). You will need to [zoomify](https://github.com/mirnylab/cooler) .cooler to .mcooler first. 
+
 This will show all possible options, the tools support all options of OnTAD:
 
 ```cooler_ontad --help```
