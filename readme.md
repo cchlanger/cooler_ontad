@@ -28,4 +28,4 @@ This will run with the binsize reduced to 30000 and only add non default paramet
 ```cooler_ontad --shortname --binsize 30000 testdata/G2.fc_1_2.wOldG2.cis.1000.mcool```
 
 ## Dockerhub container:
-This tool can be found ready to use in our main container on [dockerhub](https://hub.docker.com/repository/docker/gerlichlab/scshic_docker)
+This tool can be found ready to use in our main container on [dockerhub](https://hub.docker.com/repository/docker/gerlichlab/scshic_docker).
