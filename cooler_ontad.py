@@ -142,7 +142,7 @@ def main(filep, binsize, penalty, minsz, maxsz, ldiff, lsize, dense_matrix_only,
     tad_folder = tempfile.mkdtemp(suffix=None, prefix=None, dir=None)
     for filename in f_list:
         filename_base = os.path.basename(filename)[:-7]
-        command_string = "OnTAD %s -penalty %s -maxsz %s -maxsz %s -ldiff %s -lsize %s -o %s/%s" % (filename, penalty, minsz, maxsz, ldiff, lsize, tad_folder, filename_base, short_name)
+        command_string = "OnTAD %s -penalty %s -maxsz %s -maxsz %s -ldiff %s -lsize %s -o %s/%s" % (filename, penalty, minsz, maxsz, ldiff, lsize, tad_folder, filename_base)
         processes.append(subprocess.Popen(command_string, stdout=subprocess.PIPE, stderr=subprocess.PIPE, shell=True))
     for proc in processes:
         output, error = proc.communicate()
