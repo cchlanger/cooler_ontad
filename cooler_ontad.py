@@ -1,16 +1,16 @@
 """Command line interface for OnTAD preprocessing"""
-import click
 import os
-import cooler
 import tempfile
-import bioframe
-import numpy as np
-import pandas as pd
 import subprocess
 import glob
 import re
 import shutil
 import warnings
+import numpy as np
+import pandas as pd
+import cooler
+import bioframe
+import click
 
 # get chromosomal arms
 
@@ -29,6 +29,10 @@ def convert_to_bedpe(
     output,
     short_name,
 ):
+    """ Converts the output of all the individual OnTAD runs
+    into a  single .bedpe file,
+    adds the parameters base name.
+    """
     # get bins from cooler file
     cooler_obj = cooler.Cooler(f"{cooler_filename}::/resolutions/{binsize}")
     bins = cooler_obj.bins()[:]
@@ -39,22 +43,23 @@ def convert_to_bedpe(
         if os.stat(tad_filename).st_size != 0:
             with open(tad_filename, "r") as csvfile:
                 csvfile = open(tad_filename, "r")
-                # Skip first row, since this encodes level 0, which is the whole chromosome and check whether the file is empty afterwards
+                # Skip first row, since this encodes level 0, which is the whole chromosome
+                # Check whether the file is empty afterwards
                 try:
-                    df = pd.read_csv(csvfile, sep="\t", header=None, skiprows=1)
+                    ontad_output_df = pd.read_csv(csvfile, sep="\t", header=None, skiprows=1)
                 except pd.errors.EmptyDataError:
                     warnings.warn(f"{tad_filename} contains no TADs!")
                     continue
-                df = df.rename(columns={0: "bin1_id", 1: "bin2_id"})
-                # Substract one from all bin1_id and bin2_id to correct for one-based indexing in OnTAD
-                df = df.sub([1, 1, 0, 0, 0], axis="columns")
+                ontad_output_df = ontad_output_df.rename(columns={0: "bin1_id", 1: "bin2_id"})
+                # Substract 1 from bin1_id, bin2_id to correct for one-based indexing in OnTAD
+                ontad_output_df = ontad_output_df.sub([1, 1, 0, 0, 0], axis="columns")
                 # Extract Chromosome name out of filename
                 region = re.findall(r"(chr\d+|chr\w)", tad_filename)[0]
                 # Add offset for particular chromosome
                 offset = cooler_obj.offset(region)
-                df = df.add([offset, offset, 0, 0, 0], axis="columns")
-                # Use cooler anotate
-                result = cooler.annotate(df, bins)
+                ontad_output_df = ontad_output_df.add([offset, offset, 0, 0, 0], axis="columns")
+                # Use cooler annotate
+                result = cooler.annotate(ontad_output_df, bins)
                 result = result.drop(
                     columns=["weight1", "weight2", "bin1_id", "bin2_id"]
                 )
@@ -66,7 +71,7 @@ def convert_to_bedpe(
                 result["start2"] = mid_pos1.astype("int32")
                 result["end2"] = mid_pos2.astype("int32")
                 results.append(result)
-                # Output .bedpde with addtitonal columns TADlevel  TADmean  TADscore
+                # Output .bedpde with additional columns TADlevel  TADmean  TADscore
     bedpe = pd.concat(results)
     # Only adds paremeters to basefilename if not default or specified by the user
     string_binsize = ""
@@ -108,6 +113,9 @@ def convert_to_bedpe(
 
 
 def create_dense_matrix(filep, binsize):
+    """Creates the dense matrix that OnTAD needs,
+    from a particular resolution of an .mcooler file.
+    """
     cooler_obj = cooler.Cooler(f"{filep}::/resolutions/{binsize}")
     filename = os.path.basename(filep)
     filename_base = filename[:-6]
@@ -132,47 +140,54 @@ def create_dense_matrix(filep, binsize):
 @click.option(
     "--penalty",
     default=0.1,
-    help="--penalty <float> The penalty applied in scoring function to select positive TADs. Higher penalty score will result in fewer TADs.",
+    help="""--penalty <float> The penalty applied in scoring function to select positive TADs.
+    Higher penalty score will result in fewer TADs.""",
     show_default=True,
 )
 @click.option(
     "--maxsz",
     default=200,
-    help="--maxsz <int> The maximum size of TADs can be called. The size is determined by number of bins covered in the contact matrix.",
+    help="""--maxsz <int> The maximum size of TADs can be called.
+    The size is determined by number of bins covered in the contact matrix.""",
     show_default=True,
 )
 @click.option(
     "--minsz",
     default=3,
-    help="--minsz <int> The minimum size of TADs can be called. The size is determined by number of bins covered in the contact matrix.",
+    help="""--minsz <int> The minimum size of TADs can be called.
+    The size is determined by number of bins covered in the contact matrix.""",
     show_default=True,
 )
 @click.option(
     "--ldiff",
     default=1.96,
-    help="--ldiff <float> The cut-off to determine local minimum. (local maximum - local minimum >= ldiff*std)",
+    help="""--ldiff <float> The cut-off to determine local minimum.
+    (local maximum - local minimum >= ldiff*std)""",
     show_default=True,
 )
 @click.option(
     "--lsize",
     default=5,
-    help="--lsize <int> The local region size that used to determine local minimum",
+    help="""--lsize <int> The local region size that used to determine local minimum""",
     show_default=True,
-)
-@click.option(
-    "--dense_matrix_only",
-    is_flag=True,
-    help="--dense_matrix_only If chosen a folder dense_matrices is created and further processing is stopped",
 )
 @click.option(
     "--o",
     default=None,
-    help="--o <strig> Output filename. If left empty .mcool basename is extend with all non default parameters.",
+    help="""--o <strig> Output filename.
+    If left empty basename of the .mcool is extend with all non default parameters.""",
 )
 @click.option(
     "--short_name",
     is_flag=True,
-    help="--short_name If chosen only paremeters are added to basefilename if they are not default or specified by the user.",
+    help="""--short_name Only paremeters are added to basefilename,
+    if they are not default or specified by the user.""",
+)
+@click.option(
+    "--dense_matrix_only",
+    is_flag=True,
+    help="""--dense_matrix_only A folder dense_matrices is created
+    and further processing is stopped""",
 )
 # -log2 <boolean> if specified, log2(contact frequency) will be used to call TADs.
 # -o <file path> The file path for the TAD calling results.
@@ -188,12 +203,17 @@ def main(
     o,
     short_name,
 ):
+    """
+    Creates the dense matrices for every chromosome for OnTAD from an .mcooler file,
+    runs OnTAD on very chromosome with the given parameters,
+    outputs a single .bedpe file.
+    """
     # Create Matrix for every chromosome for OnTAD
-    print("Creating Matrix ...")
+    print("Creating Matrices ...")
     matrix_folder = create_dense_matrix(filep, binsize)
     # Call OnTAD
     if dense_matrix_only is True:
-        print("Saving Matrix then Aborting!")
+        print("Saving Matrices then Aborting!")
         if o is None:
             shutil.copytree(matrix_folder, "dense_matrices")
         else:
@@ -223,7 +243,7 @@ def main(
         if proc.returncode != 0:
             print(error.decode("utf-8"))
     # Creates the .bedpe for all chromosomes
-    print("Creating OnTAD ...")
+    print("Creating BEDPE ...")
     convert_to_bedpe(
         filep, binsize, tad_folder, penalty, minsz, maxsz, ldiff, lsize, o, short_name
     )
@@ -232,7 +252,7 @@ def main(
     # print(tad_folder)
     shutil.rmtree(matrix_folder)
     shutil.rmtree(tad_folder)
-
+    return 0
 
 if __name__ == "__main__":
     main()
