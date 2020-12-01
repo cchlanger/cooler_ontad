@@ -227,7 +227,7 @@ def main(
     for filename in f_list:
         filename_base = os.path.basename(filename)[:-7]
         command_string = (
-            "OnTAD %s -penalty %s -maxsz %s -maxsz %s -ldiff %s -lsize %s -o %s/%s"
+            "OnTAD %s -penalty %s -minsz %s -maxsz %s -ldiff %s -lsize %s -o %s/%s"
             % (filename, penalty, minsz, maxsz, ldiff, lsize, tad_folder, filename_base)
         )
         processes.append(
