@@ -9,12 +9,9 @@ import warnings
 import numpy as np
 import pandas as pd
 import cooler
-import bioframe
 import click
 
 # get chromosomal arms
-
-chromsizes = bioframe.fetch_chromsizes("hg19")
 
 
 def convert_to_bedpe(
@@ -120,7 +117,7 @@ def create_dense_matrix(filep, binsize):
     filename = os.path.basename(filep)
     filename_base = filename[:-6]
     temp_folder = tempfile.mkdtemp(suffix=None, prefix=None, dir=None)
-    for chr_name in chromsizes.index:
+    for chr_name in cooler_obj.chromsizes.index:
         matrix = cooler_obj.matrix(balance=True).fetch(chr_name)
         matrix = np.nan_to_num(matrix)
         # print(chr_name)
